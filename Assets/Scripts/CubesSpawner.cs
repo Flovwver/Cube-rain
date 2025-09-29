@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Pool;
+using System.Collections;
 
 public class CubesSpawner : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class CubesSpawner : MonoBehaviour
     [SerializeField] private int _initialSize = 10;
     [SerializeField] private int _maxSize = 10;
     [SerializeField] private float _repeatRate = 0.5f;
+    [SerializeField] private bool _spawning = true;
 
     private ObjectPool<Cube> _pool;
 
@@ -26,10 +28,24 @@ public class CubesSpawner : MonoBehaviour
 
     private void Start()
     {
-        InvokeRepeating(nameof(GetCube), 0f, _repeatRate);
+        StartCoroutine(SpawnLoop());
     }
 
-    private void GetCube()
+    private void OnDestroy()
+    {
+        _pool.Clear();
+    }
+
+    private IEnumerator SpawnLoop()
+    {
+        while (_spawning)
+        {
+            yield return new WaitForSeconds(_repeatRate);
+            SpawnCube();
+        }
+    }
+
+    private void SpawnCube()
     {
         _pool.Get();
     }
@@ -38,7 +54,8 @@ public class CubesSpawner : MonoBehaviour
     {
         Cube instance = Instantiate(_cubePrefab);
         instance.gameObject.SetActive(false);
-        instance.ReturnToPool = (cube) => _pool.Release(cube);
+
+        instance.ReturnedToPool += _pool.Release;
         return instance;
     }
 
@@ -46,8 +63,8 @@ public class CubesSpawner : MonoBehaviour
     {
         Vector2 randomDotInCircle = Random.insideUnitCircle * (_spawnArea.localScale.x / 2f);
         Vector3 spawnPoint = new Vector3(randomDotInCircle.x, 0, randomDotInCircle.y) + _spawnArea.position;
-        cube.gameObject.SetActive(true);
         cube.Spawn(spawnPoint);
+        cube.gameObject.SetActive(true);
     }
 
     private void OnReleaseCube(Cube cube)
@@ -59,11 +76,9 @@ public class CubesSpawner : MonoBehaviour
     private void OnDestroyCube(Cube cube)
     {
         if (cube != null)
+        {
+            cube.ReturnedToPool -= _pool.Release;
             Destroy(cube.gameObject);
-    }
-
-    private void OnDestroy()
-    {
-        _pool.Clear();
+        }
     }
 }

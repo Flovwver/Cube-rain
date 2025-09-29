@@ -5,27 +5,13 @@ public class ColorChanger : MonoBehaviour
     [SerializeField] private Color _baseColor;
 
     private Renderer _renderer;
-    private Cube _cube;
 
     private void Awake()
     {
         _renderer = GetComponent<Renderer>();
-        _cube = GetComponent<Cube>();
     }
 
-    private void OnEnable()
-    {
-        _cube.Spawned += OnSpawned;
-        _cube.TouchedGroundSurface += OnTouchedGroundSurface;
-    }
-
-    private void OnDisable()
-    {
-        _cube.Spawned -= OnSpawned;
-        _cube.TouchedGroundSurface -= OnTouchedGroundSurface;
-    }
-
-    private void OnSpawned()
+    public void ChangeColorToDefault()
     {
         if (_renderer != null)
         {
@@ -33,7 +19,7 @@ public class ColorChanger : MonoBehaviour
         }
     }
 
-    private void OnTouchedGroundSurface()
+    public void ChangeColorRandomly()
     {
         if (_renderer != null)
         {
