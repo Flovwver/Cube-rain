@@ -46,12 +46,14 @@ public class CubesSpawner : MonoBehaviour
     {
         Vector2 randomDotInCircle = Random.insideUnitCircle * (_spawnArea.localScale.x / 2f);
         Vector3 spawnPoint = new Vector3(randomDotInCircle.x, 0, randomDotInCircle.y) + _spawnArea.position;
+        cube.gameObject.SetActive(true);
         cube.Spawn(spawnPoint);
     }
 
     private void OnReleaseCube(Cube cube)
     {
         cube.ResetForPool();
+        cube.gameObject.SetActive(false);
     }
 
     private void OnDestroyCube(Cube cube)
